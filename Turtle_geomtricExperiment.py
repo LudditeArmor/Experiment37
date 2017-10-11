@@ -1,3 +1,4 @@
+#A graphics turtle program for experimenting with sacred geometry
 #Requirements:
 #Python 2.7.1, pygame
 
@@ -15,7 +16,6 @@ except ImportError:
     sys.stderr.write("Pygame was not found.\n")
     raw_input("Ready to quit... ")
     sys.exit()
-
 
 #Pygame and turtle init
 if sys.platform in ["win32","win64"]: 
@@ -35,6 +35,7 @@ MainTurtle.color("white")
 #MainTurtle.shape("triangle")
 MainTurtle.speed(0) #0 is fastest animation speed
 MainTurtle.pensize(1)
+#MainTurtle.mode("standard")
 
 #Variable declarations
 
@@ -52,6 +53,11 @@ TRIANGLE = 3
 SQUARE = 4
 PENTAGON = 5
 HEXAGON = 6
+#Default directions
+UP = 90
+DOWN = 270
+LEFT = 180
+RIGHT = 0
 
 #Playing a sound
 def play_sound(path):
@@ -62,6 +68,70 @@ def play_sound(path):
     sound = pygame.mixer.Sound(canonicalized_path)
     _sound_library[path] = sound
   sound.play()
+
+#Convert a string to turtle commands:
+def string_to_turtle(string, defaultLength, color="white"):
+    #Make uppercase and Convert to array
+    string = list(string.upper())
+    MainTurtle.color(color)
+    MainTurtle.setheading(UP)
+    
+    for i in range(0, len(string)):
+        #Move north
+        if string[i] == 'N':
+            MainTurtle.setheading(UP)
+            MainTurtle.forward(defaultLength)
+        #Move south
+        if string[i] == 'S':
+            MainTurtle.setheading(DOWN)
+            MainTurtle.forward(defaultLength)
+        #Move west
+        if string[i] == 'W':
+            MainTurtle.setheading(LEFT)
+            MainTurtle.forward(defaultLength)
+        #Move east
+        if string[i] == 'E':
+            MainTurtle.setheading(RIGHT)
+            MainTurtle.forward(defaultLength)
+        #Move forward
+        if string[i] == 'F':
+            MainTurtle.forward(defaultLength)
+        #Rotate left by 10 degress
+        if string[i] == '-':
+            MainTurtle.left(10)
+        #Rotate right by 10 degrees
+        if string[i] == '+':
+            MainTurtle.right(10)
+
+#Draw a sine wave starting at pos
+def wave(pos=[0,0], length=360, frequancy=10, amplitude=30, offsetX=0, offsetY=0, color="white"):
+    MainTurtle.color(color)
+    MainTurtle.penup()
+    MainTurtle.setpos(pos[0], pos[1])
+    MainTurtle.pendown()
+    for x in range(0, length):
+        y = math.sin(math.radians(x * frequancy)) * amplitude
+        MainTurtle.goto(x + offsetX, y + offsetY)
+
+#Draw simple line
+def line(source, destination, color="white"):
+    MainTurtle.color(color)
+    MainTurtle.penup()
+    MainTurtle.setpos(source[0], source[1])
+    MainTurtle.pendown()
+    MainTurtle.setpos(destination[0], destination[1])
+
+#Draw a star: Note: only odd numbers work
+def star(numberOfPoints, defaultLength, color="white", enableSound=False, soundPath="mechanical-clonk-1.wav"):
+    MainTurtle.color(color)
+    for i in range(0, numberOfPoints):
+        angle = 180.0 - 180.0 / numberOfPoints
+        MainTurtle.forward(defaultLength)
+        MainTurtle.right(angle)
+        MainTurtle.forward(defaultLength)
+        if enableSound == True:        
+            play_sound(soundPath)
+
 
 #Generate and draw fractal tree with the base starting at pos
 def tree(size): 
@@ -80,8 +150,21 @@ def tree(size):
         MainTurtle.backward(size)         
         MainTurtle.pendown() 
 
+#Draw a x equal sided polygon at pos
+def polygon(pos, size, sides, color="white"):
+    #MainTurtle.stamp() #origin
+    x_center = pos[0]
+    y_center = pos[1]
+    MainTurtle.up()
+    MainTurtle.goto(x_center, y_center)
+    MainTurtle.down()
+    MainTurtle.color(color)
+    for i in range(0, sides):
+        MainTurtle.forward(size)
+        MainTurtle.left(360/sides)
+
 #Draw a circle with center at position with size radius
-def circle(pos, radius, color):
+def circle(pos, radius, color="white"):
     x_center = pos[0]
     y_center = pos[1]    
     MainTurtle.up()
@@ -106,68 +189,77 @@ def circle(pos, radius, color):
         x_sign = x_sign_new
     return  
 
-#Draw a x equal sided polygon at pos
-def polygon(pos, size, sides, color):
-    MainTurtle.stamp() #origin
-    x_center = pos[0]
-    y_center = pos[1]
-    MainTurtle.up()
-    MainTurtle.goto(x_center, y_center)
-    MainTurtle.down()
-    MainTurtle.color(color)
-    for i in range(0, sides):
+def koch_init(size, iterations):
+    for i in range(0, iterations):
         MainTurtle.forward(size)
-        MainTurtle.left(360/sides)
-
-def koch_init(size):
-    MainTurtle.forward(size)
-    play_sound("beep-7.wav")
-    MainTurtle.left(60)
-    MainTurtle.forward(size)
-    play_sound("beep-3.wav")
-    MainTurtle.right(60*2)
-    MainTurtle.forward(size)
-    play_sound("beep-7.wav")
-    MainTurtle.left(60)
-    MainTurtle.forward(size)
+        play_sound("beep-7.wav")
+        MainTurtle.left(60)
+        MainTurtle.forward(size)
+        play_sound("beep-3.wav")
+        MainTurtle.right(60*2)
+        MainTurtle.forward(size)
+        play_sound("beep-7.wav")
+        MainTurtle.left(60)
+        MainTurtle.forward(size)
 
 def koch_generate(size, iterations, color):
     MainTurtle.color(color)
     x = 1
     x += 1
-    koch_init(size * math.sin(x))
+    koch_init(size * math.sin(x), 1)
     x += 1
     MainTurtle.left(60)
-    koch_init(size* math.sin(x))
+    koch_init(size* math.sin(x), 2)
     x += 1
     MainTurtle.right(60*2)
-    koch_init(size * math.sin(x))
+    koch_init(size * math.sin(x), 2)
     x += 1
     MainTurtle.left(60)
-    koch_init(size * math.sin(x))
+    koch_init(size * math.sin(x), 1)
     
 #Init of program (run once before main program cycle)
 def init():
-    polygon([0, 0], 60, 2, "green")
+    koch_generate(50, 20, "violet")
+    test_debug()
+
+#Testing and debugging
+def test_debug():
+    MainTurtle.reset()
+    wave()
+    wave([0,0], 360, 20, 60, 0, 0, "red")
+    MainTurtle.reset()
+    polygon([30, 30], 60, 6, "green")
     polygon([50, 50], 60, 5, "white")
-    MainTurtle.right(90)
+    polygon([70, 70], 60, 4, "red")
+    polygon([90, 90], 60, 3, "violet")
+    polygon([-50, -50], 60, 12, "violet")
+    MainTurtle.reset()
+    for i in range(3, 8):
+        star(3, 50 * (i / 2), "blue", True)
+        star(5, 70 * (i / 2), "red", True)
+        star(7, 90 * (i / 2), "green", True)
+        star(9, 110 * (i / 2), "white", True)
+ #   MainTurtle.right(90)
+    MainTurtle.reset()
+    for i in range(0, 10):
+        string_to_turtle("NNNNNNNNEEEEEEEEEESSSSSSSSSSWWWWWWWWWW+W-", 5, "yellow")
+    MainTurtle.home
+    for i in range(0, 10):
+        string_to_turtle("NNWWSSEN", 20, "orange")
+    MainTurtle.reset()    
+    #koch_curve(10, 100)
     for i in range(1, 11):
         MainTurtle.setpos(0, 0)
-        koch_generate(90 / i, 5, "red")
-        koch_generate(90 / i*i, 5, "blue")
-    #circle([0, 0], 10, "white")
-    #circle([120, 120], 40, "green")
-    #circle([25, 25], 80, "red")
-    #circle([80, 25], 40, "blue")
-    
-
-    #MainTurtle.left(90)
-    #MainTurtle.penup() 
-    #MainTurtle.setpos(0, 0) 
-    #MainTurtle.pendown() 
-    #tree(35, MainTurtle)
-    #pass
-    
+        koch_generate(90 / i, 5, "violet")
+        koch_generate(90 / i*i, 5, "red")
+    MainTurtle.reset()
+    circle([0, 0], 10, "white")
+    MainTurtle.reset()
+    tree(40)
+    return
+    circle([120, 120], 40, "green")
+    circle([25, 25], 80, "red")
+    circle([80, 25], 40, "blue")
 
 #Update (main) loop
 def process():
