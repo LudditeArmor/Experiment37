@@ -107,19 +107,30 @@ def string_to_turtle(string, defaultLength, color="white"):
 def wave(pos=[0,0], length=360, frequancy=10, amplitude=30, offsetX=0, offsetY=0, color="white"):
     MainTurtle.color(color)
     MainTurtle.penup()
-    MainTurtle.setpos(pos[0], pos[1])
-    MainTurtle.pendown()
-    for x in range(0, length):
-        y = math.sin(math.radians(x * frequancy)) * amplitude
+    MainTurtle.setpos(pos[0], pos[1])    
+    for x in range(pos[0] + (-length/2), pos[0] + (length/2)):
+        y = pos[1] + (math.sin(math.radians(x * frequancy)) * amplitude)
         MainTurtle.goto(x + offsetX, y + offsetY)
+        MainTurtle.pendown()
 
-#Draw simple line
+#Draw simple line with color
 def line(source, destination, color="white"):
     MainTurtle.color(color)
     MainTurtle.penup()
     MainTurtle.setpos(source[0], source[1])
     MainTurtle.pendown()
     MainTurtle.setpos(destination[0], destination[1])
+
+#Draw x and y axes in range
+def axes(x_start, x_end, y_start, y_end):
+    #Draw x-axis
+    line([x_start, 0], [x_end, 0], "blue")
+    #Draw y-axis    
+    line([0, y_start], [0, y_end], "red")
+    MainTurtle.color("white")
+    MainTurtle.penup()
+    MainTurtle.home()
+    MainTurtle.pendown()
 
 #Draw a star: Note: only odd numbers work
 def star(numberOfPoints, defaultLength, color="white", enableSound=False, soundPath="mechanical-clonk-1.wav"):
@@ -131,7 +142,6 @@ def star(numberOfPoints, defaultLength, color="white", enableSound=False, soundP
         MainTurtle.forward(defaultLength)
         if enableSound == True:        
             play_sound(soundPath)
-
 
 #Generate and draw fractal tree with the base starting at pos
 def tree(size): 
@@ -189,6 +199,47 @@ def circle(pos, radius, color="white"):
         x_sign = x_sign_new
     return  
 
+#Draw polar coordinates grid in range with step
+#Note: Its best to use a multiple of 20 for the step number
+def polar_grid(x_start, x_end, y_start, y_end, step=40, numbrOfCircles=8):
+    #Draw horizontal line
+    line([x_start, 0], [x_end, 0], "white")
+    #Draw vertical line
+    line([0, y_start], [0, y_end], "white")
+    #Draw line from Southwest to Northeast
+    line([x_start, y_start], [x_end, y_end], "white")
+    #Draw line from Southeast to Northwest
+    line([x_end, y_start], [x_start, y_end], "white")
+    #Draw circles
+    for i in xrange(step, step*numbrOfCircles, step):
+        circle([0,0], i, "white")
+
+#Draw cartesian coordinates grid in range with step
+#Note: Its best to use a multiple of 10 for the step number
+def cartesian_grid(x_start, x_end, y_start, y_end, step=10):
+    #Draw horizontal lines
+    for i in xrange(y_start, y_end, step):
+        line([x_start, i], [x_end, i], "white")
+    #Draw vertical lines    
+    for i in xrange(x_start, x_end, step):
+        line([i, y_start], [i, y_end], "white")
+    #Draw x and y axes
+    axes(x_start, x_end, y_start, y_end)    
+
+    #Draw lower horizontal lines:
+#    for i in xrange(y_start, 0, step):
+#        line([x_start, i], [x_end, i], "violet")    
+    #Draw upper horizontal lines:
+#    for i in xrange(0, y_end, step):
+#        line([x_start, i], [x_end, i], "violet")
+    #Draw left vertical lines    
+#    for i in xrange(x_start, 0, step):
+#        line([i, y_start], [i, y_end], "violet")    
+    #Draw right vertical lines    
+#    for i in xrange(0, x_end, step):
+#        line([i, y_start], [i, y_end], "violet")
+
+
 def koch_init(size, iterations):
     for i in range(0, iterations):
         MainTurtle.forward(size)
@@ -219,12 +270,16 @@ def koch_generate(size, iterations, color):
     
 #Init of program (run once before main program cycle)
 def init():
-    koch_generate(50, 20, "violet")
+    axes(-350, 350, -250, 250) 
+    wave()  
+    koch_generate(50, 20, "violet")    
     test_debug()
 
 #Testing and debugging
 def test_debug():
     MainTurtle.reset()
+    polar_grid(-350, 350, -250, 250)
+    cartesian_grid(-350, 350, -250, 250)
     wave()
     wave([0,0], 360, 20, 60, 0, 0, "red")
     MainTurtle.reset()
