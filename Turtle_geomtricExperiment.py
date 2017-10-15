@@ -26,6 +26,7 @@ screen_size = [1024, 600]
 screen_surface = turtle.Screen()
 screen_surface.setup(width=screen_size[0], height=screen_size[1], startx=None, starty=None)
 screen_surface.bgcolor("black")
+screen_surface.colormode(255)
 title = "Experiment37"
 version = "1.0 (Turtle) Oktober 2017"
 screen_surface.title(title + " " + version)
@@ -68,6 +69,13 @@ def play_sound(path):
     sound = pygame.mixer.Sound(canonicalized_path)
     _sound_library[path] = sound
   sound.play()
+
+#Clears the screen and resets the direction(left)and position(0,0) and speed(0) of the turtle 
+#For a complete reset use: MainTurtle.reset()
+def soft_reset():
+    MainTurtle.home()
+    MainTurtle.clear()
+    MainTurtle.speed(0)
 
 #Convert a string to turtle commands:
 def string_to_turtle(string, defaultLength, color="white"):
@@ -267,50 +275,66 @@ def koch_generate(size, iterations, color):
     x += 1
     MainTurtle.left(60)
     koch_init(size * math.sin(x), 1)
+
+#Draw random lines with optional random colors
+#area = [x_start, x_end, y_start, y_end] if area is not given it draws over entire screen
+def random_lines(iterations, color="white", isRandomColor=0, area=[-(screen_surface.window_width() / 2), (screen_surface.window_width() / 2), -(screen_surface.window_height() / 2), (screen_surface.window_height() / 2)]):
+    MainTurtle.color(color)
+    MainTurtle.home
+    for i in range(0, iterations):
+        if isRandomColor == 1:
+            MainTurtle.color((random.randint(1, 255), random.randint(1, 255), random.randint(1, 255)))
+        x = random.randint(area[0], area[1])
+        y = random.randint(area[2], area[3])
+        MainTurtle.goto(x, y)
     
 #Init of program (run once before main program cycle)
 def init():
     axes(-350, 350, -250, 250) 
-    wave()  
+    wave()
     koch_generate(50, 20, "violet")    
     test_debug()
 
 #Testing and debugging
 def test_debug():
-    MainTurtle.reset()
+    soft_reset()
     polar_grid(-350, 350, -250, 250)
     cartesian_grid(-350, 350, -250, 250)
     wave()
     wave([0,0], 360, 20, 60, 0, 0, "red")
-    MainTurtle.reset()
+    soft_reset()
     polygon([30, 30], 60, 6, "green")
     polygon([50, 50], 60, 5, "white")
     polygon([70, 70], 60, 4, "red")
     polygon([90, 90], 60, 3, "violet")
     polygon([-50, -50], 60, 12, "violet")
-    MainTurtle.reset()
+    soft_reset()
     for i in range(3, 8):
         star(3, 50 * (i / 2), "blue", True)
         star(5, 70 * (i / 2), "red", True)
         star(7, 90 * (i / 2), "green", True)
         star(9, 110 * (i / 2), "white", True)
  #   MainTurtle.right(90)
-    MainTurtle.reset()
+    soft_reset()
     for i in range(0, 10):
         string_to_turtle("NNNNNNNNEEEEEEEEEESSSSSSSSSSWWWWWWWWWW+W-", 5, "yellow")
     MainTurtle.home
     for i in range(0, 10):
         string_to_turtle("NNWWSSEN", 20, "orange")
-    MainTurtle.reset()    
+    soft_reset()    
+    random_lines(200, "white", 1)
+    soft_reset()
+    random_lines(337)
+    soft_reset()
     #koch_curve(10, 100)
     for i in range(1, 11):
         MainTurtle.setpos(0, 0)
         koch_generate(90 / i, 5, "violet")
         koch_generate(90 / i*i, 5, "red")
-    MainTurtle.reset()
+    soft_reset()
     circle([0, 0], 10, "white")
-    MainTurtle.reset()
-    tree(40)
+    soft_reset()
+    tree(10)
     return
     circle([120, 120], 40, "green")
     circle([25, 25], 80, "red")
@@ -329,8 +353,6 @@ def stop():
     #global isRunning
     isRunning = False
 
-
-
 #Input handler 
 #NOTE: pygame input does not work without initializing the pygame screen
 def get_input():
@@ -344,6 +366,7 @@ def main():
     print("Program title: " + title)
     print("Program version: " + version)
     print("Screen size: " + str(screen_surface.window_width()) + " X " + str(screen_surface.window_height()))
+    random.seed()    
     clock = pygame.time.Clock()
     #Frame skipping for quicker animation
     animation_speed = 0
